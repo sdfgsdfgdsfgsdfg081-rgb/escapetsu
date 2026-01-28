@@ -2,6 +2,7 @@
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local mouse = player:GetMouse()
 
@@ -35,7 +36,7 @@ panel.Size = UDim2.fromOffset(430,370)
 panel.Position = UDim2.fromScale(0.5,0.5)
 panel.AnchorPoint = Vector2.new(0.5,0.5)
 panel.BackgroundColor3 = Color3.fromRGB(15,15,15)
-panel.BackgroundTransparency = 0.3 -- 70% dark glass
+panel.BackgroundTransparency = 0.3
 panel.Visible = false
 panel.Active = true
 panel.Draggable = true
@@ -49,7 +50,7 @@ panelStroke.Transparency = 0.1
 --==================== TITLE ====================--
 local title = Instance.new("TextLabel", panel)
 title.Size = UDim2.new(1,0,0,45)
-title.BackgroundColor3 = Color3.fromRGB(120,30,30)
+title.BackgroundColor3 = Color3.fromRGB(140,30,30)
 title.BackgroundTransparency = 0.2
 title.Text = "☢️ Marouf's Hub"
 title.Font = Enum.Font.GothamBold
@@ -113,7 +114,7 @@ UIS.JumpRequest:Connect(function()
 	if superJump and player.Character then
 		local hum = player.Character:FindFirstChildOfClass("Humanoid")
 		if hum and hum.RootPart then
-			hum.RootPart.Velocity += Vector3.new(0,18,0) -- weaker than before
+			hum.RootPart.Velocity += Vector3.new(0,10,0) -- weaker super jump
 		end
 	end
 end)
@@ -131,7 +132,22 @@ mouse.Button1Down:Connect(function()
 	end
 end)
 
---==================== TP BUTTONS ====================--
+--==================== SAFE TP FUNCTION (STRONG) ====================--
+local function safeTP(pos)
+	if not player.Character then return end
+	local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+	local hum = player.Character:FindFirstChildOfClass("Humanoid")
+	if hrp and hum then
+		hum.PlatformStand = true
+		hrp.Anchored = true
+		hrp.CFrame = CFrame.new(pos)
+		task.wait(0.05)
+		hrp.Anchored = false
+		hum.PlatformStand = false
+	end
+end
+
+--==================== CREATE TP BUTTON WITH GLOW ====================--
 local function createTP(text,pos)
 	local b = Instance.new("TextButton", scroll)
 	b.Size = UDim2.new(1,0,0,36)
@@ -142,14 +158,24 @@ local function createTP(text,pos)
 	b.BackgroundColor3 = Color3.fromRGB(90,40,40)
 	b.BorderSizePixel = 0
 	Instance.new("UICorner", b).CornerRadius = UDim.new(0,10)
+
+	local stroke = Instance.new("UIStroke", b)
+	stroke.Color = Color3.fromRGB(255,255,255)
+	stroke.Thickness = 1
+	stroke.Transparency = 0.6
+
 	b.MouseButton1Click:Connect(function()
-		local c = player.Character
-		if c and c:FindFirstChild("HumanoidRootPart") then
-			c.HumanoidRootPart.CFrame = CFrame.new(pos)
-		end
+		safeTP(pos)
+		-- Glowy Pulse Animation
+		local tween = TweenService:Create(stroke,TweenInfo.new(0.3,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut,0,false,true),{Transparency=0})
+		tween:Play()
+		tween.Completed:Connect(function()
+			stroke.Transparency = 0.6
+		end)
 	end)
 end
 
+--==================== ALL TPS ====================--
 local coords = {
 	Vector3.new(845.9,-1.9,48),
 	Vector3.new(824.2,-1.9,136.2),
@@ -159,8 +185,8 @@ local coords = {
 	Vector3.new(759.4,-1.9,1745.8),
 	Vector3.new(769.7,-1.9,2467.2),
 	Vector3.new(768.3,-1.9,3450.7),
-	Vector3.new(805.1,-1.9,4748.9), -- special TP
-	Vector3.new(791.6,3.6,-94.2) -- Spawn Beta
+	Vector3.new(805.1,-1.9,4748.9),
+	Vector3.new(791.6,3.6,-94.2)
 }
 local names = {"TP 1","TP 2","TP 3","TP 4","TP 5","TP 6","TP 7","TP 8","⭐ SPECIAL TP","TP (Spawn - Beta)"}
 for i,v in ipairs(coords) do createTP(names[i],v) end
@@ -168,12 +194,10 @@ for i,v in ipairs(coords) do createTP(names[i],v) end
 --==================== SITE COORDINATES ====================--
 local siteCoords = false
 local siteBtn = createSwitch("🌐 Site Coordinates")
-
 local sitePanel
 siteBtn.MouseButton1Click:Connect(function()
 	siteCoords = not siteCoords
 	siteBtn.Text = siteCoords and "ON" or "OFF"
-
 	if siteCoords then
 		sitePanel = Instance.new("Frame", gui)
 		sitePanel.Size = UDim2.fromOffset(180,60)
