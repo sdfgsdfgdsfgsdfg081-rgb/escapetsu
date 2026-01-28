@@ -1,293 +1,217 @@
--- Ultimate Super Panel v15 – With Nuke Icon Toggle
+--==================== Marouf's Hub ====================--
 local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local mouse = player:GetMouse()
 
--- ================= GUI =================
+--==================== GUI ====================--
 local gui = Instance.new("ScreenGui")
-gui.Name = "UltimateSuperPanel"
+gui.Name = "MaroufsHub"
 gui.ResetOnSpawn = false
-gui.Parent = player:WaitForChild("PlayerGui")
+gui.Parent = game.CoreGui
 
--- ===== SMALL NUKE LOGO =====
-local nukeIcon = Instance.new("TextButton")
-nukeIcon.Size = UDim2.fromOffset(50,50)
-nukeIcon.Position = UDim2.fromScale(0.9,0.1)
-nukeIcon.BackgroundColor3 = Color3.fromRGB(255,60,60)
-nukeIcon.Text = "☢"
-nukeIcon.TextScaled = true
-nukeIcon.Font = Enum.Font.GothamBold
-nukeIcon.TextColor3 = Color3.fromRGB(0,0,0)
-nukeIcon.Parent = gui
-nukeIcon.Active = true
-nukeIcon.Draggable = true
-Instance.new("UICorner", nukeIcon).CornerRadius = UDim.new(0,10)
+--==================== LOGO (SQUARE + WHITE GLOW) ====================--
+local logo = Instance.new("TextButton", gui)
+logo.Size = UDim2.fromOffset(56,56)
+logo.Position = UDim2.fromScale(0.05,0.5)
+logo.Text = "M"
+logo.Font = Enum.Font.GothamBlack
+logo.TextSize = 26
+logo.TextColor3 = Color3.new(1,1,1)
+logo.BackgroundColor3 = Color3.fromRGB(20,20,20)
+logo.BorderSizePixel = 0
+logo.Active = true
+logo.Draggable = true
+Instance.new("UICorner", logo).CornerRadius = UDim.new(0,8)
+local logoStroke = Instance.new("UIStroke", logo)
+logoStroke.Color = Color3.fromRGB(255,255,255)
+logoStroke.Thickness = 2
+logoStroke.Transparency = 0.15
 
--- ===== MAIN PANEL =====
-local frame = Instance.new("Frame")
-frame.Size = UDim2.fromScale(0.22,0.55)
-frame.Position = UDim2.fromScale(0.38,0.2)
-frame.BackgroundColor3 = Color3.fromRGB(35,35,35)
-frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = true
-frame.Parent = gui
-frame.Visible = false
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0,15)
+--==================== PANEL (GLASS + RED GLOW) ====================--
+local panel = Instance.new("Frame", gui)
+panel.Size = UDim2.fromOffset(430,370)
+panel.Position = UDim2.fromScale(0.5,0.5)
+panel.AnchorPoint = Vector2.new(0.5,0.5)
+panel.BackgroundColor3 = Color3.fromRGB(15,15,15)
+panel.BackgroundTransparency = 0.3 -- 70% dark glass
+panel.Visible = false
+panel.Active = true
+panel.Draggable = true
+panel.BorderSizePixel = 0
+Instance.new("UICorner", panel).CornerRadius = UDim.new(0,18)
+local panelStroke = Instance.new("UIStroke", panel)
+panelStroke.Color = Color3.fromRGB(200,40,40)
+panelStroke.Thickness = 2
+panelStroke.Transparency = 0.1
 
-local title = Instance.new("TextLabel")
-title.Size = UDim2.fromScale(1,0.1)
-title.Position = UDim2.fromScale(0,0)
-title.BackgroundTransparency = 1
-title.Text = "ULTIMATE PANEL"
+--==================== TITLE ====================--
+local title = Instance.new("TextLabel", panel)
+title.Size = UDim2.new(1,0,0,45)
+title.BackgroundColor3 = Color3.fromRGB(120,30,30)
+title.BackgroundTransparency = 0.2
+title.Text = "☢️ Marouf's Hub"
 title.Font = Enum.Font.GothamBold
-title.TextColor3 = Color3.fromRGB(255,255,255)
-title.TextScaled = true
-title.Parent = frame
+title.TextSize = 20
+title.TextColor3 = Color3.new(1,1,1)
+title.BorderSizePixel = 0
+Instance.new("UICorner", title).CornerRadius = UDim.new(0,18)
 
--- ===== SCROLLING FRAME =====
-local scroll = Instance.new("ScrollingFrame")
-scroll.Size = UDim2.fromScale(1,0.9)
-scroll.Position = UDim2.fromScale(0,0.1)
-scroll.BackgroundTransparency = 1
+--==================== SCROLL ====================--
+local scroll = Instance.new("ScrollingFrame", panel)
+scroll.Position = UDim2.fromOffset(12,55)
+scroll.Size = UDim2.new(1,-24,1,-67)
 scroll.CanvasSize = UDim2.new(0,0,0,0)
 scroll.ScrollBarThickness = 6
-scroll.Parent = frame
+scroll.BackgroundTransparency = 1
+local layout = Instance.new("UIListLayout", scroll)
+layout.Padding = UDim.new(0,8)
+layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	scroll.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 10)
+end)
 
-local uiLayout = Instance.new("UIListLayout")
-uiLayout.SortOrder = Enum.SortOrder.LayoutOrder
-uiLayout.Padding = UDim.new(0,4)
-uiLayout.Parent = scroll
+--==================== SWITCH CREATOR ====================--
+local function createSwitch(text)
+	local holder = Instance.new("Frame", scroll)
+	holder.Size = UDim2.new(1,0,0,40)
+	holder.BackgroundColor3 = Color3.fromRGB(70,50,120)
+	holder.BorderSizePixel = 0
+	Instance.new("UICorner", holder).CornerRadius = UDim.new(0,12)
 
-local function updateCanvas()
-	scroll.CanvasSize = UDim2.new(0,0,0,uiLayout.AbsoluteContentSize.Y + 10)
-end
-
--- ===== SWITCH CREATOR =====
-local function createSwitch(parent,text)
-	local switch = Instance.new("Frame")
-	switch.Size = UDim2.fromScale(0.9,0.065)
-	switch.BackgroundColor3 = Color3.fromRGB(170,0,0)
-	switch.BorderSizePixel = 0
-	switch.Parent = parent
-	Instance.new("UICorner", switch).CornerRadius = UDim.new(0,12)
-
-	local knob = Instance.new("TextButton")
-	knob.Size = UDim2.fromScale(0.45,1)
-	knob.Position = UDim2.fromScale(0,0)
-	knob.BackgroundColor3 = Color3.fromRGB(255,255,255)
-	knob.Text = ""
-	knob.BorderSizePixel = 0
-	knob.Parent = switch
-	Instance.new("UICorner", knob).CornerRadius = UDim.new(0,12)
-
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.fromScale(1,1)
-	label.Position = UDim2.fromScale(0,0)
+	local label = Instance.new("TextLabel", holder)
+	label.Size = UDim2.new(0.7,0,1,0)
 	label.BackgroundTransparency = 1
 	label.Text = text
 	label.Font = Enum.Font.GothamBold
+	label.TextSize = 15
 	label.TextColor3 = Color3.fromRGB(255,255,255)
-	label.TextScaled = true
-	label.Parent = switch
 
-	return switch, knob
-end
-
--- ===== SWITCHES =====
-local ghostSwitch, ghostKnob = createSwitch(scroll,"GHOST MODE")
-local jumpSwitch, jumpKnob = createSwitch(scroll,"INF JUMP")
-local secretNukeSwitch, secretNukeKnob = createSwitch(scroll,"SECRET NUKE")
-local aSwitch, aKnob = createSwitch(scroll,"A PANEL")
-
--- ===== TP BUTTON CREATOR =====
-local function createTPButton(parent,text,position)
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.fromScale(0.9,0.055)
-	btn.BackgroundColor3 = Color3.fromRGB(0,0,255)
-	btn.TextColor3 = Color3.fromRGB(255,255,255)
-	btn.Text = text
+	local btn = Instance.new("TextButton", holder)
+	btn.Size = UDim2.new(0.25,0,0.7,0)
+	btn.Position = UDim2.new(0.72,0,0.15,0)
+	btn.Text = "OFF"
 	btn.Font = Enum.Font.GothamBold
-	btn.TextScaled = true
-	btn.Parent = parent
+	btn.TextSize = 14
+	btn.TextColor3 = Color3.fromRGB(25,25,25)
+	btn.BackgroundColor3 = Color3.fromRGB(240,240,240)
+	btn.BorderSizePixel = 0
 	Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)
 
-	btn.MouseButton1Click:Connect(function()
-		local char = player.Character
-		if char and char:FindFirstChild("HumanoidRootPart") then
-			char.HumanoidRootPart.CFrame = CFrame.new(position)
-		end
-	end)
 	return btn
 end
 
--- TP Buttons 1-8 + Special
-local tpCoords = {
-	Vector3.new(845.9, -1.9, 48.0),
-	Vector3.new(824.2, -1.9, 136.2),
-	Vector3.new(769.4, -1.9, 319.7),
-	Vector3.new(732.7, -1.9, 648.5),
-	Vector3.new(818.4, -1.9, 1160.9),
-	Vector3.new(759.4, -1.9, 1745.8),
-	Vector3.new(769.7, -1.9, 2467.2),
-	Vector3.new(768.3, -1.9, 3450.7)
-}
+--==================== SUPER JUMP ====================--
+local superJump = false
+local sjBtn = createSwitch("🦘 Super Jump")
+sjBtn.MouseButton1Click:Connect(function()
+	superJump = not superJump
+	sjBtn.Text = superJump and "ON" or "OFF"
+end)
 
-for i,pos in ipairs(tpCoords) do
-	createTPButton(scroll,"TP "..i,pos)
-end
-createTPButton(scroll,"TP SPECIAL",Vector3.new(805.1,-1.9,4748.9))
-updateCanvas()
-
--- ===== LOGIC VARIABLES =====
-local ghostOn = false
-local jumpOn = false
-local secretNukeOn = false
-local aPanelOn = false
-local noclipConnection
-local aPanel
-local aTextButton
-
--- GHOST MODE
-local function setNoclip(state)
-	if noclipConnection then
-		noclipConnection:Disconnect()
-		noclipConnection = nil
+UIS.JumpRequest:Connect(function()
+	if superJump and player.Character then
+		local hum = player.Character:FindFirstChildOfClass("Humanoid")
+		if hum and hum.RootPart then
+			hum.RootPart.Velocity += Vector3.new(0,18,0) -- weaker than before
+		end
 	end
-	if state then
-		noclipConnection = RunService.Stepped:Connect(function()
-			local char = player.Character
-			if not char then return end
-			for _,v in pairs(char:GetDescendants()) do
-				if v:IsA("BasePart") then
-					v.CanCollide = false
-				end
+end)
+
+--==================== SECRET NUKE TP ====================--
+local secret = false
+local nukeBtn = createSwitch("☢️ Secret Nuke TP")
+nukeBtn.MouseButton1Click:Connect(function()
+	secret = not secret
+	nukeBtn.Text = secret and "ON" or "OFF"
+end)
+mouse.Button1Down:Connect(function()
+	if secret and mouse.Hit and player.Character then
+		player.Character:MoveTo(mouse.Hit.Position + Vector3.new(0,3,0))
+	end
+end)
+
+--==================== TP BUTTONS ====================--
+local function createTP(text,pos)
+	local b = Instance.new("TextButton", scroll)
+	b.Size = UDim2.new(1,0,0,36)
+	b.Text = text
+	b.Font = Enum.Font.GothamSemibold
+	b.TextSize = 14
+	b.TextColor3 = Color3.new(1,1,1)
+	b.BackgroundColor3 = Color3.fromRGB(90,40,40)
+	b.BorderSizePixel = 0
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0,10)
+	b.MouseButton1Click:Connect(function()
+		local c = player.Character
+		if c and c:FindFirstChild("HumanoidRootPart") then
+			c.HumanoidRootPart.CFrame = CFrame.new(pos)
+		end
+	end)
+end
+
+local coords = {
+	Vector3.new(845.9,-1.9,48),
+	Vector3.new(824.2,-1.9,136.2),
+	Vector3.new(769.4,-1.9,319.7),
+	Vector3.new(732.7,-1.9,648.5),
+	Vector3.new(818.4,-1.9,1160.9),
+	Vector3.new(759.4,-1.9,1745.8),
+	Vector3.new(769.7,-1.9,2467.2),
+	Vector3.new(768.3,-1.9,3450.7),
+	Vector3.new(805.1,-1.9,4748.9), -- special TP
+	Vector3.new(791.6,3.6,-94.2) -- Spawn Beta
+}
+local names = {"TP 1","TP 2","TP 3","TP 4","TP 5","TP 6","TP 7","TP 8","⭐ SPECIAL TP","TP (Spawn - Beta)"}
+for i,v in ipairs(coords) do createTP(names[i],v) end
+
+--==================== SITE COORDINATES ====================--
+local siteCoords = false
+local siteBtn = createSwitch("🌐 Site Coordinates")
+
+local sitePanel
+siteBtn.MouseButton1Click:Connect(function()
+	siteCoords = not siteCoords
+	siteBtn.Text = siteCoords and "ON" or "OFF"
+
+	if siteCoords then
+		sitePanel = Instance.new("Frame", gui)
+		sitePanel.Size = UDim2.fromOffset(180,60)
+		sitePanel.Position = UDim2.fromScale(0.8,0.7)
+		sitePanel.AnchorPoint = Vector2.new(0.5,0.5)
+		sitePanel.BackgroundColor3 = Color3.fromRGB(90,200,240)
+		sitePanel.BackgroundTransparency = 0.2
+		sitePanel.Active = true
+		sitePanel.Draggable = true
+		Instance.new("UICorner", sitePanel).CornerRadius = UDim.new(0,12)
+
+		local label = Instance.new("TextButton", sitePanel)
+		label.Size = UDim2.fromScale(1,1)
+		label.BackgroundTransparency = 1
+		label.Font = Enum.Font.GothamBold
+		label.TextSize = 14
+		label.TextColor3 = Color3.new(1,1,1)
+
+		label.MouseButton1Click:Connect(function()
+			if label.Text ~= "" then
+				setclipboard(label.Text)
 			end
 		end)
-	end
-end
 
-ghostKnob.MouseButton1Click:Connect(function()
-	if not ghostOn then
-		ghostKnob:TweenPosition(UDim2.new(0.55,0,0,0),"Out","Quad",0.15,true)
-		ghostSwitch.BackgroundColor3 = Color3.fromRGB(0,170,0)
-		ghostOn = true
-		setNoclip(true)
-	else
-		ghostKnob:TweenPosition(UDim2.new(0,0,0,0),"Out","Quad",0.15,true)
-		ghostSwitch.BackgroundColor3 = Color3.fromRGB(170,0,0)
-		ghostOn = false
-		setNoclip(false)
-	end
-end)
-
--- INF JUMP
-jumpKnob.MouseButton1Click:Connect(function()
-	if not jumpOn then
-		jumpKnob:TweenPosition(UDim2.new(0.55,0,0,0),"Out","Quad",0.15,true)
-		jumpSwitch.BackgroundColor3 = Color3.fromRGB(0,170,0)
-		jumpOn = true
-	else
-		jumpKnob:TweenPosition(UDim2.new(0,0,0,0),"Out","Quad",0.15,true)
-		jumpSwitch.BackgroundColor3 = Color3.fromRGB(170,0,0)
-		jumpOn = false
-	end
-end)
-
-UserInputService.JumpRequest:Connect(function()
-	if jumpOn then
-		local char = player.Character
-		if char and char:FindFirstChild("Humanoid") and char:FindFirstChild("HumanoidRootPart") then
-			local hum = char.Humanoid
-			local root = char.HumanoidRootPart
-			hum:ChangeState(Enum.HumanoidStateType.Jumping)
-			root.Velocity = Vector3.new(root.Velocity.X,50,root.Velocity.Z)
-		end
-	end
-end)
-
--- SECRET NUKE LOGIC
-secretNukeKnob.MouseButton1Click:Connect(function()
-	if not secretNukeOn then
-		secretNukeKnob:TweenPosition(UDim2.new(0.55,0,0,0),"Out","Quad",0.15,true)
-		secretNukeSwitch.BackgroundColor3 = Color3.fromRGB(0,170,0)
-		secretNukeOn = true
-	else
-		secretNukeKnob:TweenPosition(UDim2.new(0,0,0,0),"Out","Quad",0.15,true)
-		secretNukeSwitch.BackgroundColor3 = Color3.fromRGB(170,0,0)
-		secretNukeOn = false
-	end
-end)
-
-mouse.Button1Down:Connect(function()
-	if secretNukeOn then
-		local targetPos = mouse.Hit.Position
-		local char = player.Character
-		if char and char:FindFirstChild("HumanoidRootPart") then
-			char.HumanoidRootPart.CFrame = CFrame.new(targetPos + Vector3.new(0,3,0))
-		end
-	end
-end)
-
--- ===== A PANEL LOGIC =====
-aKnob.MouseButton1Click:Connect(function()
-	if not aPanelOn then
-		aKnob:TweenPosition(UDim2.new(0.55,0,0,0),"Out","Quad",0.15,true)
-		aSwitch.BackgroundColor3 = Color3.fromRGB(0,170,0)
-		aPanelOn = true
-		aPanel = Instance.new("Frame",gui)
-		aPanel.Size = UDim2.fromOffset(200,100)
-		aPanel.Position = UDim2.fromScale(0.5,0.5)
-		aPanel.AnchorPoint = Vector2.new(0.5,0.5)
-		aPanel.BackgroundColor3 = Color3.fromRGB(220,220,220)
-		aPanel.Active = true
-		aPanel.Draggable = true
-		Instance.new("UICorner", aPanel).CornerRadius = UDim.new(0,10)
-		aTextButton = Instance.new("TextButton",aPanel)
-		aTextButton.Size = UDim2.fromScale(1,1)
-		aTextButton.BackgroundTransparency = 1
-		aTextButton.TextScaled = true
-		aTextButton.Font = Enum.Font.GothamBold
-		aTextButton.TextColor3 = Color3.fromRGB(0,0,0)
 		RunService.RenderStepped:Connect(function()
-			if aPanelOn and aTextButton then
+			if sitePanel then
 				local pos = player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character.HumanoidRootPart.Position
 				if pos then
-					aTextButton.Text = string.format("X: %.1f Y: %.1f Z: %.1f", pos.X, pos.Y, pos.Z)
+					label.Text = string.format("X: %.1f Y: %.1f Z: %.1f", pos.X,pos.Y,pos.Z)
 				end
-			end
-		end)
-		aTextButton.MouseButton1Click:Connect(function()
-			if aTextButton.Text then
-				setclipboard(aTextButton.Text)
 			end
 		end)
 	else
-		aKnob:TweenPosition(UDim2.new(0,0,0,0),"Out","Quad",0.15,true)
-		aSwitch.BackgroundColor3 = Color3.fromRGB(170,0,0)
-		aPanelOn = false
-		if aPanel then aPanel:Destroy() end
+		if sitePanel then sitePanel:Destroy() end
 	end
 end)
 
--- ===== NUKE ICON TOGGLE PANEL =====
-nukeIcon.MouseButton1Click:Connect(function()
-	frame.Visible = not frame.Visible
-end)
-
--- REAPPLY GHOST ON RESPAWN
-player.CharacterAdded:Connect(function()
-	if ghostOn then
-		task.wait(0.2)
-		local char = player.Character
-		if char then
-			for _,v in pairs(char:GetDescendants()) do
-				if v:IsA("BasePart") then
-					v.CanCollide = false
-				end
-			end
-		end
-	end
+--==================== TOGGLE PANEL ====================--
+logo.MouseButton1Click:Connect(function()
+	panel.Visible = not panel.Visible
 end)
